@@ -1,0 +1,136 @@
+version: 3
+
+tasks:
+
+
+  setup:
+    desc: 'Setup the environment for the application'
+    cmds:
+    - echo "Setting up the environment"
+
+  run:
+    silent: true
+    desc: run a script
+    cmds:
+      - |
+        args={{._args_}} 
+        # expanded and assigned to positional parameter
+        set -- ${args[@]}
+        # removing the '--' at the beginning required to pass extra flags
+        test "$1" = "--" && shift
+        export PYTHONPATH="$OPS_PWD/packages:$OPS_PWD/tests"
+        uv run "$@"
+
+  test:
+    silent: true
+    desc: initialize the project
+    cmds:
+      - |
+        args={{._args_}}
+        # exanded and assigned to positional parameter
+        set -- ${args[@]}
+        # removing the '--' at the beginning required to pass extra flags
+        test "$1" = "--" && shift
+        #uv run pytest $OPS_PWD/tests "$@"
+        HERE=$(pwd)
+        cd $OPS_PWD
+        if test -z "{{._action_}}" 
+        then "$HERE/.venv/bin/pytest"
+        else
+          PACKAGE="$(echo '{{._action_}}' | cut -d'/' -f1)"
+          NAME="$(echo '{{._action_}}' | cut -d'/' -f2)"
+          "$HERE/.venv/bin/pytest" tests/$PACKAGE/test_${PACKAGE}_${NAME}*.py
+        fi
+        
+
+  cli:
+    silent: true
+    desc: run cli commands
+    cmds:
+      - |
+        export IPYTHONDIR=$(pwd)
+        uv run ipython
+  
+  user:
+    silent: true
+    desc: manage users
+    cmds:
+      - |
+        uv run user.py "{{._user_}}" "{{.__add}}" "{{.__remove}}" "{{.__update}}" 
+
+
+  unnew:
+    silent: true
+    desc: remove generated  python action
+    ignore_errors: true
+    env:
+       ACTION: "{{._action_}}"
+       PACKAGE: "{{or ._package_ ._action_}}"
+       DIR:  "packages/{{or ._package_ ._action_}}/{{._action_}}"
+       FILE: "packages/{{or ._package_ ._action_}}/{{._action_}}/{{._action_}}.py"
+    cmds:
+    - > 
+      rm -rvf
+      $OPS_PWD/packages/$PACKAGE/$ACTION/__pycache__/ 
+      $OPS_PWD/tests/$PACKAGE/__pycache__/ 
+      $OPS_PWD/packages/$PACKAGE/$ACTION.zip
+    - > 
+       rm -vf
+       $OPS_PWD/packages/$PACKAGE/${ACTION}/__main__.py
+       $OPS_PWD/packages/$PACKAGE/${ACTION}/${ACTION}.py
+       $OPS_PWD/tests/$PACKAGE/test_${PACKAGE}_${ACTION}.py
+       $OPS_PWD/tests/$PACKAGE/test_${PACKAGE}_${ACTION}_int.py
+    - >
+      rmdir $OPS_PWD/packages/$PACKAGE/$ACTION 
+      $OPS_PWD/packages/$PACKAGE
+      $OPS_PWD/tests/$PACKAGE
+
+  new:
+    silent: true
+    desc: generate a new python action
+    env:
+       ACTION: "{{._action_}}"
+       PACKAGE: "{{or ._package_ ._action_}}"
+       DIR:  "packages/{{or ._package_ ._action_}}/{{._action_}}"
+       FILE: "packages/{{or ._package_ ._action_}}/{{._action_}}/{{._action_}}.py"
+    cmds:
+    - |
+      if ! {{.__force}}
+      then test ! -e "$OPS_PWD/$FILE" || die "file already exists"
+      fi
+    - |
+      mkdir -p $OPS_PWD/tests/$PACKAGE
+      mkdir -p $OPS_PWD/$DIR
+    - |
+      cat <<EOF >$OPS_PWD/$FILE
+      def $ACTION(args):
+        return { "output": "$ACTION" }
+      EOF
+    - |
+      cat <<EOF >$OPS_PWD/$DIR/__main__.py
+      #--kind python:default
+      #--web true
+      import $ACTION
+      def main(args):
+        return { "body": $ACTION.$ACTION(args) }
+      EOF
+    - |
+      cat <<EOF >$OPS_PWD/tests/$PACKAGE/test_${PACKAGE}_${ACTION}.py
+      import $PACKAGE.$ACTION.$ACTION as m
+      
+      def test_${PACKAGE}_$ACTION():
+          args = {}
+          res = m.$ACTION(args)
+          assert res["output"] == "$ACTION"
+      EOF
+    - |
+      cat <<EOF >$OPS_PWD/tests/$PACKAGE/test_${PACKAGE}_${ACTION}_int.py
+      import os, requests as req
+
+      def test_${PACKAGE}_${ACTION}_int():
+          url = f"{os.environ.get("OPSDEV_HOST", "")}/api/my/$PACKAGE/$ACTION"
+          res = req.get(url).json()
+          assert res.get("output") == "$ACTION"
+      EOF
+
+  
