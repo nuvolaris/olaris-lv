@@ -1,8 +1,0 @@
-version: 3
-
-tasks:
-
-  setup:
-    desc: 'Setup the environment for the application'
-    cmds:
-    - echo "Setting up the environment"

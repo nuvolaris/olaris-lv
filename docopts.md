@@ -6,7 +6,7 @@ Tools tasks to generate code.
 
 ```text
 Usage:
-  lv setup
+  lv setup [<sub>]
   lv cli
   lv run  [<args>...]
   lv test [<action>]
