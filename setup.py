@@ -3,7 +3,7 @@ from pathlib import Path
 
 os.chdir(os.getenv("OPS_PWD") or ".")
 
-#print(sys.argv)
+print(sys.argv)
 if len(sys.argv) <2 or sys.argv[1] == "":
     dir = "packages/lovable/index"
     extra = None
@@ -11,7 +11,7 @@ if len(sys.argv) <2 or sys.argv[1] == "":
     index = "index.html"
 else:
     c = sys.argv[1]
-    dir = f"packages/frontend/{c}"
+    dir = f"packages/lovable/{c}"
     index = f"{c}.html"
     extra = f" && mv web/index.html web/{index}"
     name = c.capitalize()
@@ -47,13 +47,14 @@ if(vc.find("OPSDEV_HOST") == -1):
 Path("vite.config.js").write_text(vc, encoding="utf-8")
 
 os.makedirs(dir, exist_ok=True)
+os.makedirs("web", exist_ok=True)
 Path(f"{dir}/__main__.py").write_text(f"""#TODO: customize this file
 #--kind python:default
 #--web true
 #--annotation index '99:Lovable:{name}:admin'
 def main(args):
     return {{
-        "body": {{"iframe": "{index}" }}
+        "body": {{"iframe": "/{index}" }}
      }} 
 """)
 
