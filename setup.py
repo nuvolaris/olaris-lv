@@ -3,6 +3,7 @@ from pathlib import Path
 import shutil
 
 os.chdir(os.getenv("OPS_PWD") or ".")
+print("pwd", os.getcwd())
 
 #print(sys.argv)
 if len(sys.argv) <2 or sys.argv[1] == "":
@@ -27,7 +28,11 @@ pj["scripts"]["build"] = build
 Path("package.json").write_text(json.dumps(pj, indent=2), encoding="utf-8")
 
 # fix vite.config.js
-vc = Path("vite.config.js").read_text()
+file = Path("vite.config.js")
+if not file.exists():
+    file = Path("vite.config.ts")
+    
+vc = file.read_text()
 if(vc.find("OPSDEV_HOST") == -1):
     pos = vc.find("server: {\n") +10
     vc1 = vc[:pos] + """proxy: {
@@ -44,11 +49,14 @@ if(vc.find("OPSDEV_HOST") == -1):
 }},
 """ +vc1[pos:]
     vc = vc2
-    Path("vite.config.js").write_text(vc, encoding="utf-8")
+    file.write_text(vc, encoding="utf-8")
 
 # fix router
-app = Path(f"src/App.jsx").read_text(encoding="utf-8").replace("BrowserRouter", "HashRouter")
-Path(f"src/App.jsx").write_text(app, encoding="utf-8")
+file = Path("src/App.jsx")
+if not file.exists():
+    file = Path("src/App.tsx")
+app = file.read_text(encoding="utf-8").replace("BrowserRouter", "HashRouter")
+file.write_text(app, encoding="utf-8")
 
 # remove index if renaming
 shutil.rmtree("web", ignore_errors=True)
