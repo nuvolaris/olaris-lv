@@ -3,7 +3,7 @@ from pathlib import Path
 import shutil
 
 os.chdir(os.getenv("OPS_PWD") or ".")
-print("pwd", os.getcwd())
+#print("pwd", os.getcwd())
 
 #print(sys.argv)
 if len(sys.argv) <2 or sys.argv[1] == "":
