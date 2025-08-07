@@ -4,10 +4,12 @@ tasks:
 
 
   setup:
+    silent: true
     desc: 'Setup the environment for the application'
     cmds:
-    - npm install
+    - which npm || die "npm is not installed"
     - uv run setup.py "{{._sub_}}"
+    - cd "$OPS_PWD" && npm install
 
   run:
     silent: true

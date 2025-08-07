@@ -1,19 +1,20 @@
 import os, json, sys
 from pathlib import Path
+import shutil
 
 os.chdir(os.getenv("OPS_PWD") or ".")
 
-print(sys.argv)
+#print(sys.argv)
 if len(sys.argv) <2 or sys.argv[1] == "":
     dir = "packages/lovable/index"
-    extra = None
+    build = "vite build"
     name = "App"
     index = "index.html"
 else:
     c = sys.argv[1]
     dir = f"packages/lovable/{c}"
     index = f"{c}.html"
-    extra = f" && mv web/index.html web/{index}"
+    build = f"vite build && mv web/index.html web/{index}"
     name = c.capitalize()
 
 # fix package.json
@@ -22,8 +23,7 @@ pj["openserverless"] = {
     "devel": "npm run dev",
     "deploy": "npm run build"
 }
-if extra and pj["scripts"].get("build").find("&&") == -1:
-    pj["scripts"]["build"] += extra
+pj["scripts"]["build"] = build
 Path("package.json").write_text(json.dumps(pj, indent=2), encoding="utf-8")
 
 # fix vite.config.js
@@ -44,10 +44,17 @@ if(vc.find("OPSDEV_HOST") == -1):
 }},
 """ +vc1[pos:]
     vc = vc2
-Path("vite.config.js").write_text(vc, encoding="utf-8")
+    Path("vite.config.js").write_text(vc, encoding="utf-8")
+
+# fix router
+app = Path(f"src/App.jsx").read_text(encoding="utf-8").replace("BrowserRouter", "HashRouter")
+Path(f"src/App.jsx").write_text(app, encoding="utf-8")
+
+# remove index if renaming
+shutil.rmtree("web", ignore_errors=True)
+shutil.rmtree("packages", ignore_errors=True)
 
 os.makedirs(dir, exist_ok=True)
-os.makedirs("web", exist_ok=True)
 Path(f"{dir}/__main__.py").write_text(f"""#TODO: customize this file
 #--kind python:default
 #--web true
@@ -57,8 +64,3 @@ def main(args):
         "body": {{"iframe": "/{index}" }}
      }} 
 """)
-
-# fix router
-app = Path(f"src/App.jsx").read_text(encoding="utf-8").replace("BrowserRouter", "HashRouter")
-Path(f"src/App.jsx").write_text(app, encoding="utf-8")
-
