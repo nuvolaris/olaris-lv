@@ -66,9 +66,9 @@ os.makedirs(dir, exist_ok=True)
 Path(f"{dir}/__main__.py").write_text(f"""#TODO: customize this file
 #--kind python:default
 #--web true
-#--annotation index '99:Lovable:{name}:admin'
+#--annotation index '99:Lovable:{name}:admin:/{index}'
 def main(args):
     return {{
-        "body": {{"iframe": "/{index}" }}
+        "body": {{"output": "Welcome to {name}" }}
      }} 
 """)
