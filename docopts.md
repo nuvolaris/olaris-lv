@@ -13,5 +13,6 @@ Usage:
   lv new  <action> [<package>] [--force]
   lv unnew  <action> [<package>]
   lv user [<user>] [--add|--remove|--update]
+  lv copilot
 ```
 
