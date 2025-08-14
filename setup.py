@@ -63,12 +63,21 @@ shutil.rmtree("web", ignore_errors=True)
 shutil.rmtree("packages", ignore_errors=True)
 
 os.makedirs(dir, exist_ok=True)
-Path(f"{dir}/__main__.py").write_text(f"""#TODO: customize this file
+
+Path(f"{dir}/__main__.py").write_text(f"""
 #--kind python:default
 #--web true
 #--annotation index '99:Lovable:{name}:admin:/{index}'
+import {c}
 def main(args):
     return {{
-        "body": {{"output": "Welcome to {name}" }}
+        "body": {c}.{c}(args)
      }} 
+""")
+
+Path(f"{dir}/{c}.py").write_text(f"""
+def {c}(args):
+    return {{
+        "output": "Welcome to {name}" 
+    }} 
 """)
