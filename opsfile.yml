@@ -72,10 +72,12 @@ tasks:
         uv run user.py "{{._user_}}" "{{.__add}}" "{{.__remove}}" "{{.__update}}" 
 
 
-  unnew:
+  _remove:
     silent: true
-    desc: remove generated  python action
+    #desc: remove generated  python action
     ignore_errors: true
+    status: 
+     - test "{{._REMOVE}}" != "true"
     env:
        ACTION: "{{._action_}}"
        PACKAGE: "{{or ._package_ ._action_}}"
@@ -108,8 +110,11 @@ tasks:
        FILE: "packages/{{or ._package_ ._action_}}/{{._action_}}/{{._action_}}.py"
     cmds:
     - |
-      if ! {{.__force}}
-      then test ! -e "$OPS_PWD/$FILE" || die "file already exists"
+      if ! {{.__remove}}
+      then
+        if ! {{.__force}}
+        then test ! -e "$OPS_PWD/$FILE" || die "file already exists, overwrite with --force"
+        fi
       fi
     - |
       mkdir -p $OPS_PWD/tests/$PACKAGE
@@ -145,5 +150,7 @@ tasks:
           res = req.get(url).json()
           assert res.get("output") == "$ACTION"
       EOF
+    - task: _remove
+      vars:
+         _REMOVE: "{{.__remove}}"
 
-  

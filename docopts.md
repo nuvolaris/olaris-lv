@@ -10,9 +10,9 @@ Usage:
   lv cli
   lv run  [<args>...]
   lv test [<action>]
-  lv new  <action> [<package>] [--force]
-  lv unnew  <action> [<package>]
+  lv new  <action> [<package>] [--force] [--remove]
   lv user [<user>] [--add|--remove|--update]
   lv copilot
+  lv login
 ```
 

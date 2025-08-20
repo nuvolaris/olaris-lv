@@ -11,6 +11,7 @@ if len(sys.argv) <2 or sys.argv[1] == "":
     build = "vite build"
     name = "App"
     index = "index.html"
+    c = "index"
 else:
     c = sys.argv[1]
     dir = f"packages/lovable/{c}"
@@ -65,22 +66,21 @@ try:
 
     os.makedirs(dir, exist_ok=True)
 
-    Path(f"{dir}/__main__.py").write_text(f"""
-    #--kind python:default
-    #--web true
-    #--annotation index '99:Lovable:{name}:admin:/{index}'
-    import {c}
-    def main(args):
-        return {{
-            "body": {c}.{c}(args)
-        }} 
-    """)
+    Path(f"{dir}/__main__.py").write_text(f"""#--kind python:default
+#--web true
+#--annotation index '99:Lovable:{name}:admin:/{index}'
+import {c}
+def main(args):
+    return {{
+        "body": {c}.{c}(args)
+    }} 
+""")
 
     Path(f"{dir}/{c}.py").write_text(f"""
-    def {c}(args):
-        return {{
-            "output": "Welcome to {name}" 
-        }} 
-    """)
+def {c}(args):
+    return {{
+        "output": "Welcome to {name}" 
+    }} 
+""")
 except FileNotFoundError as e:
     print(f"This folder does not look like a valid Lovable app... cannot continue")
