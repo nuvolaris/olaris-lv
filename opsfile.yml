@@ -1,22 +1,28 @@
 version: 3
 
+vars:
+  PYVER: "3.12"
+  PYREQ: "https://raw.githubusercontent.com/apache/openserverless-runtimes/refs/heads/main/runtime/python/v3.12/requirements.txt"
+    
 tasks:
 
-
   setup:
-    silent: true
+    silent: false
     desc: 'Setup the environment for the application'
     cmds:
     - which npm  >/dev/null || die "npm is not installed"
+    - uv venv -p {{.PYVER}}
+    - uv pip install -r requirements.txt
+    - echo curl -sL "{{.PYREQ}}" -o requirements.txt
     - uv run setup.py "{{._sub_}}"
     - cd "$OPS_PWD" && npm install
-    - task: _copilot
+    - task: _setup1
 
-  _copilot:
-    silent: true
+  _setup1:
+    silent: false
     desc: 'Setup copilot'
     cmds: 
-    - mkdir -p "$OPS_PWD/.github/instructions"
+     - mkdir -p "$OPS_PWD/.github/instructions"
      - cp -v copilot-instructions.md "$OPS_PWD/.github/copilot-instructions.md"
      - mkdir -p "$OPS_PWD/.devcontainer"
      - cp -v devcontainer.json "$OPS_PWD/.devcontainer/devcontainer.json"

@@ -1,6 +1,6 @@
 services:
     app:
-      image: ghcr.io/mastrogpt/agent41-starter:2506201530
+      image: mcr.microsoft.com/devcontainers/javascript-node:20
       volumes:
         - ../..:/workspaces:cached
       depends_on:
