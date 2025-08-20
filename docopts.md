@@ -7,12 +7,11 @@ Tools tasks to generate code.
 ```text
 Usage:
   lv setup [<sub>]
+  lv config
   lv cli
   lv run  [<args>...]
   lv test [<action>]
   lv new  <action> [<package>] [--force] [--remove]
   lv user [<user>] [--add|--remove|--update]
-  lv _copilot
-  lv login
 ```
 

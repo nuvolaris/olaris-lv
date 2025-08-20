@@ -7,28 +7,29 @@ vars:
 tasks:
 
   setup:
-    silent: false
+    silent: true
     desc: 'Setup the environment for the application'
     cmds:
     - which npm  >/dev/null || die "npm is not installed"
+    - curl -sL "{{.PYREQ}}" -o requirements.txt
     - uv venv -p {{.PYVER}}
     - uv pip install -r requirements.txt
-    - echo curl -sL "{{.PYREQ}}" -o requirements.txt
     - uv run setup.py "{{._sub_}}"
     - cd "$OPS_PWD" && npm install
-    - task: _setup1
+    - task: _setup
 
-  _setup1:
-    silent: false
-    desc: 'Setup copilot'
+  config:
+    silent: true
+    desc: config
     cmds: 
-     - mkdir -p "$OPS_PWD/.github/instructions"
-     - cp -v copilot-instructions.md "$OPS_PWD/.github/copilot-instructions.md"
-     - mkdir -p "$OPS_PWD/.devcontainer"
-     - cp -v devcontainer.json "$OPS_PWD/.devcontainer/devcontainer.json"
-     - cp -v docker-compose.yml "$OPS_PWD/.devcontainer/docker-compose.yml"
-     - mkdir -p "$OPS_PWD/tests"
-     - cp -v test.env "$OPS_PWD/tests/.env"
+    - cd config && tar cf - * .* | tar xvf -  -C "$OPS_PWD"
+    #  - mkdir -p "$OPS_PWD/.github/instructions"
+    #  - cp -v copilot-instructions.md "$OPS_PWD/.github/copilot-instructions.md"
+    #  - mkdir -p "$OPS_PWD/.devcontainer"
+    #  - cp -v devcontainer.json "$OPS_PWD/.devcontainer/devcontainer.json"
+    #  - cp -v docker-compose.yml "$OPS_PWD/.devcontainer/docker-compose.yml"
+    #  - mkdir -p "$OPS_PWD/tests"
+    #  - cp -v test.env "$OPS_PWD/tests/.env"
 
   run:
     silent: true
