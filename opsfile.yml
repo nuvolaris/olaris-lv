@@ -10,13 +10,13 @@ tasks:
     silent: true
     desc: 'Setup the environment for the application'
     cmds:
-    - which npm  >/dev/null || die "npm is not installed"
     - curl -sL "{{.PYREQ}}" -o requirements.txt
     - uv venv -p {{.PYVER}}
     - uv pip install -r requirements.txt
     - uv run setup.py "{{._sub_}}"
-    - cd "$OPS_PWD" && npm install
-    - task: _setup
+    - task: config
+    - which npm  >/dev/null || die "npm is not installed"
+    - cd "$OPS_PWD" && npm install || true
 
   config:
     silent: true
