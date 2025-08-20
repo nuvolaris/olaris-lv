@@ -1,5 +1,5 @@
 {
-	"name": "Agent41",
+	"name": "LovableNuvolaris",
 	"dockerComposeFile": ["docker-compose.yml"],
 	"service": "app",
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
