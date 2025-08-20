@@ -51,6 +51,10 @@ ops ide deploy
 - Use only the following approved libraries:
   - `requests`
   - `openai`
+  - `psycopg`
+  - `boto3`
+  - `pymilvus`
+  - `redis`
 
 ### Secrets Management
 When needing a secret:

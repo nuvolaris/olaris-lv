@@ -15,10 +15,14 @@ tasks:
   _copilot:
     silent: true
     desc: 'Setup copilot'
-    cmds:
+    cmds: 
     - mkdir -p "$OPS_PWD/.github/instructions"
-    - cp -v copilot-instructions.md "$OPS_PWD/.github/copilot-instructions.md"
-    #- cp instructions/*.md
+     - cp -v copilot-instructions.md "$OPS_PWD/.github/copilot-instructions.md"
+     - mkdir -p "$OPS_PWD/.devcontainer"
+     - cp -v devcontainer.json "$OPS_PWD/.devcontainer/devcontainer.json"
+     - cp -v docker-compose.yml "$OPS_PWD/.devcontainer/docker-compose.yml"
+     - mkdir -p "$OPS_PWD/tests"
+     - cp -v test.env "$OPS_PWD/tests/.env"
 
   run:
     silent: true
