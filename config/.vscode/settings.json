@@ -1,3 +1,4 @@
 {
-  "python.defaultInterpreterPath": "${workspaceFolder}/olaris-lv/.venv/bin/python"
+  "python.defaultInterpreterPath": "${env:HOME}/.ops/olaris-lv/.venv/bin/python",
+  "npm.packageManager": "npm"
 }
