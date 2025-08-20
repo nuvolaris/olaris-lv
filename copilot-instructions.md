@@ -1,14 +1,135 @@
-When requested to function or an action  deduct the <name> and optionally the <package> (assume <package> = 'default' if not specified). 
+# Serverless REST API Backend Development Instructions
 
-Use the command:
+## Overview
+You are developing a serverless REST API backend for a frontend application. Each function operates independently, is scalable, and stateless without shared code.
 
-  ops lv new <action> <package> 
+## Goals
+- Code Python REST API backend functions
+- Support an existing JavaScript frontend (generated with Lovable) that **MUST NOT** be modified
+- Each deployed action becomes a REST endpoint at `/api/my/<package>/<name>`
 
-NEVER use `pip import` or a `requirements.txt`, assume you have the required libraries.
+## Project Structure
 
-It should generate the files:
+### Action Organization
+- Actions are stored in `packages/<package>/<name>/*.py`
+- Each action requires a `packages/<package>/<name>/__main__.py` file
+- Each action has an `<action>.py` file with a `main` function
+- Unit tests: `tests/<package>/test_<name>.py`
+- Integration tests: `tests/<package>/test_<name>_int.py`
 
-- packages/<package>/<name>/__main__.py
-- packages/<package>/<name>/<name>.py
-- tests/<package>/test_<name>.py
-- tests/<package>/test_<name>_int.py
+### Function Structure
+- Main function receives JSON object input and returns JSON object output (never arrays or primitives)
+- `__main__.py` ends with: `return {"body": <action>.<action>(args) }`
+- Write code in `<action>.py` file within the `<action>` module, **never** in `__main__.py`
+- Always add annotation comments (format: `#--`) in `__main__.py`
+
+## Development Commands
+
+### Creating Actions
+```bash
+ops lv new <action> <package>
+```
+
+### Deployment
+```bash
+# Login first
+ops ide login
+
+# Deploy single action
+ops ide deploy <package>/<action>
+
+# Deploy all actions
+ops ide deploy
+```
+
+## Environment and Dependencies
+
+### Limitations
+- Write **only Python code**, not JavaScript
+- Consider only `packages/*` and `tests/*` folders
+- **NEVER** use `pip import` or `requirements.txt`
+- Use only the following approved libraries:
+  - `requests`
+  - `openai`
+
+### Secrets Management
+When needing a secret:
+1. Request addition to `.env` file
+2. Add metadata comment to `__main__.py`: `#--param <SECRET> "$<SECRET>"`
+3. Retrieve in main function (not `__main__.py`):
+   ```python
+   <SECRET> = args.get("<SECRET>", os.getenv("<SECRET>"))
+   ```
+
+## Service Integrations
+
+### Redis Configuration
+Add to `__main__.py`:
+```python
+#--param REDIS_URL $REDIS_URL
+#--param REDIS_PREFIX $REDIS_PREFIX
+```
+
+Access code for `<action>.<action>(args)`:
+```python
+rd = redis.from_url(args.get("REDIS_URL"), os.getenv("REDIS_URL"))
+prefix = args.get("REDIS_PREFIX"), os.getenv("REDIS_PREFIX"))
+# Always use prefix for all Redis Keys
+```
+
+### PostgreSQL Configuration
+Add to `__main__.py`:
+```python
+#--param POSTGRES_URL "$POSTGRES_URL"
+```
+
+Access code for `<action>.<action>(args)`:
+```python
+dburl = args.get("POSTGRES_URL", os.getenv("POSTGRES_URL"))
+```
+
+### S3 Configuration
+Add to `__main__.py`:
+```python
+#--param S3_HOST $S3_HOST
+#--param S3_PORT $S3_PORT
+#--param S3_ACCESS_KEY $S3_ACCESS_KEY
+#--param S3_SECRET_KEY $S3_SECRET_KEY
+#--param S3_BUCKET_DATA $S3_BUCKET_DATA
+```
+
+Access code for `<action>.<action>(args)`:
+```python
+host = args.get("S3_HOST", os.getenv("S3_HOST"))
+port = args.get("S3_PORT", os.getenv("S3_PORT"))
+url = f"http://{host}:{port}"
+key = args.get("S3_ACCESS_KEY", os.getenv("S3_ACCESS_KEY"))
+sec = args.get("S3_SECRET_KEY", os.getenv("S3_SECRET_KEY"))
+store_s3 = boto3.client('s3', region_name='us-east-1', endpoint_url=url, aws_access_key_id=key, aws_secret_access_key=sec)
+store_bucket = args.get("S3_BUCKET_DATA", os.getenv("S3_BUCKET_DATA"))
+```
+
+### Milvus Configuration
+Add to `__main__.py`:
+```python
+#--param MILVUS_HOST $MILVUS_HOST
+#--param MILVUS_PORT $MILVUS_PORT
+#--param MILVUS_DB_NAME $MILVUS_DB_NAME
+#--param MILVUS_TOKEN $MILVUS_TOKEN
+```
+
+Access code for `<action>.<action>(args)`:
+```python
+uri = f"http://{args.get("MILVUS_HOST", os.getenv("MILVUS_HOST"))}"
+token = args.get("MILVUS_TOKEN", os.getenv("MILVUS_TOKEN"))
+db_name = args.get("MILVUS_DB_NAME", os.getenv("MILVUS_DB_NAME"))
+client = MilvusClient(uri=uri, token=token, db_name=db_name)
+```
+
+## Key Requirements Summary
+- Serverless, stateless, independent functions
+- Python-only backend development
+- JSON input/output objects only
+- Proper annotation comments in `__main__.py`
+- Environment-based configuration management
+- Support for Redis, PostgreSQL, S3, and Milvus services

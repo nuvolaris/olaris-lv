@@ -3,14 +3,6 @@ version: 3
 tasks:
 
 
-  copilot:
-    silent: true
-    desc: 'Setup copilot'
-    cmds:
-    - mkdir -p "$OPS_PWD/.github/instructions"
-    - cp copilot-instructions.md "$OPS_PWD/.github/copilot-instructions.md"
-    #- cp instructions/*.md
-
   setup:
     silent: true
     desc: 'Setup the environment for the application'
@@ -18,8 +10,15 @@ tasks:
     - which npm  >/dev/null || die "npm is not installed"
     - uv run setup.py "{{._sub_}}"
     - cd "$OPS_PWD" && npm install
-    - task: copilot
+    - task: _copilot
 
+  _copilot:
+    silent: true
+    desc: 'Setup copilot'
+    cmds:
+    - mkdir -p "$OPS_PWD/.github/instructions"
+    - cp -v copilot-instructions.md "$OPS_PWD/.github/copilot-instructions.md"
+    #- cp instructions/*.md
 
   run:
     silent: true

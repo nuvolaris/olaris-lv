@@ -1,0 +1,118 @@
+You are working in a serverless environment and your application is a REST API backend for a frontend application.
+
+Each function is independent, scalable and stateless. They do not share code.
+
+<Goals>
+Your task is to code the backend REST functions.
+Write python action implementing the REST API backend of a frontend application.
+The code base also includes a frontend application in javascript, generated with Lovable, that MUST NOT be modified.
+</Goals>
+
+<HighLevelDetails>
+- Each action has a <name> and they are collected in <packages>.
+- Each action when deployed is a REST endpoint, it is available as `/api/my/<package>/<name>` in the same site of the frontent.
+- Each action has a main function that will receive it input as a JSON object and return a JSON object as result, always objects not arrays or primitives.
+- You  should create new actions with `ops lv new <action> <package>`
+- Each action should have a `__main__.py` file and an <action>.py  with a `main` function that ends with   `return {"body": `<action>.<action>(args) }`.
+- Always add code to the <action>.py  file in the <action> module, never in the `__main__.py`
+- Always ass annotation comments (in the form `#--`  in the `__main__.py`)
+</HighLevelDetails>
+
+<Limitations>
+Write only Python code, not Javascript code.
+Consider only packages/* and tests/* folder, ignore all the rest of the project.
+NEVER use `pip import` or a `requirements.txt`, always use the listed libraries below.
+</Limitations>
+
+
+<ProjectLayout>
+Actions are stored in packages/<package>/<name>/*.py
+There is always a  packages/<package>/<name>/__main__.py in each action
+Unit tests are stored in tests/<package>/test_<name>.py
+Integration tests are stored in tests/<package>/test_<name>_int.py
+</ProjectLayout>
+
+<Secrets>
+When you need a <SECRET>, ask to add it to `.env` and check it is there. Do not add it yourself.
+When you find the secret, add to the file `__main__.py` the metadata comment:
+`#--param <SECRET> "$<SECRET>"`
+then add in the main function (not the `__main__.py) 
+this code to retrieve the secret either from the args and the env with:
+`<SECRET> = args.get("<SECRET>", os.getenv("<SECRET>")
+</Secrets>
+
+
+<Deployment>
+Actions are deployed as serverless functions.
+You need to login in the environment with `ops ide login` to be able to deploy actions.
+You can deploy a single action invoke `ops ide deploy <package>/<action>` and all of them with `ops ide deploy`
+</Deployment>
+
+
+<Services>
+To access Redis, add those annotations to `__main__.py`
+```
+#--param REDIS_URL $REDIS_URL
+#--param REDIS_PREFIX $REDIS_PREFIX
+```
+
+To access Postgresql, add those annotations to `__main__.py`
+```
+#--param POSTGRES_URL "$POSTGRES_URL"
+```
+
+To access S3, add those annotations to `__main__.py`:
+```
+#--param S3_HOST $S3_HOST
+#--param S3_PORT $S3_PORT
+#--param S3_ACCESS_KEY $S3_ACCESS_KEY
+#--param S3_SECRET_KEY $S3_SECRET_KEY
+#--param S3_BUCKET_DATA $S3_BUCKET_DATA
+```
+
+To access Milvus, add those annotations to `__main__.py`
+```
+#--param MILVUS_HOST $MILVUS_HOST
+#--param MILVUS_PORT $MILVUS_PORT
+#--param MILVUS_DB_NAME $MILVUS_DB_NAME
+#--param MILVUS_TOKEN $MILVUS_TOKEN
+```
+</Services>
+
+<Snippets>
+To access Redis, add this code to  `<action>.<action>(args)`:
+```
+rd = redis.from_url(args.get("REDIS_URL"), os.getenv("REDIS_URL"))
+prefix = args.get("REDIS_PREFIX"), os.getenv("REDIS_PREFIX"))
+```
+Alaways use the `prefix` for all Redis Keys.
+
+To access Postgres, add this code to  `<action>.<action>(args)`:
+```
+dburl = args.get("POSTGRES_URL", os.getenv("POSTGRES_URL"))
+```
+
+To access S3, add this code to  `<action>.<action>(args)`:
+```
+host = args.get("S3_HOST", os.getenv("S3_HOST"))
+port = args.get("S3_PORT", os.getenv("S3_PORT"))
+url = f"http://{host}:{port}"
+key = args.get("S3_ACCESS_KEY", os.getenv("S3_ACCESS_KEY"))
+sec = args.get("S3_SECRET_KEY", os.getenv("S3_SECRET_KEY"))
+store_s3 = boto3.client('s3', region_name='us-east-1', endpoint_url=url, aws_access_key_id=key, aws_secret_access_key=sec )
+store_bucket =args.get("S3_BUCKET_DATA", os.getenv("S3_BUCKET_DATA"))
+```
+
+To access Milvus, add this code to  `<action>.<action>(args)`:
+```
+uri = f"http://{args.get("MILVUS_HOST", os.getenv("MILVUS_HOST"))}"
+token = args.get("MILVUS_TOKEN", os.getenv("MILVUS_TOKEN"))    
+db_name = args.get("MILVUS_DB_NAME", os.getenv("MILVUS_DB_NAME"))
+client =  MilvusClient(uri=uri, token=token, db_name=db_name)
+```
+</Snippets>
+
+<PythonLibraries>
+requests
+openai
+</PythonLibraries>
