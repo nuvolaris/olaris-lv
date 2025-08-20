@@ -8,5 +8,4 @@ code --install-extension pgant.antonio-ops-vscode-extension@1.3.2
 if test -z "$C"
 then echo "Installed as index.html"
      echo "Use 'ops lv setup <comp>' to set up as <comp>.html"
-     echo "Please open the container to setup the test environment"
 fi
