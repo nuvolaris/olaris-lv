@@ -1,5 +1,7 @@
 #!/bin/bash
+nvm use 20
 curl -sL bit.ly/get-ops | bash
+echo "export OPS_BRANCH=main" >> ~/.bashrc
 source ~/.bashrc
 ops -plugin https://github.com/nuvolaris/olaris-lv
 ops lv setup "$C"
