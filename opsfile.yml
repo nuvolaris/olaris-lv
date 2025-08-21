@@ -22,14 +22,7 @@ tasks:
     silent: true
     desc: config
     cmds: 
-    - cd config && tar cf - .* | tar xvf -  -C "$OPS_PWD"
-    #  - mkdir -p "$OPS_PWD/.github/instructions"
-    #  - cp -v copilot-instructions.md "$OPS_PWD/.github/copilot-instructions.md"
-    #  - mkdir -p "$OPS_PWD/.devcontainer"
-    #  - cp -v devcontainer.json "$OPS_PWD/.devcontainer/devcontainer.json"
-    #  - cp -v docker-compose.yml "$OPS_PWD/.devcontainer/docker-compose.yml"
-    #  - mkdir -p "$OPS_PWD/tests"
-    #  - cp -v test.env "$OPS_PWD/tests/.env"
+    - cd config && tar cf - * .* | tar xvf -  -C "$OPS_PWD"
 
   run:
     silent: true
