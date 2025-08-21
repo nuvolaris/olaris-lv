@@ -8,7 +8,7 @@ code --install-extension pgant.antonio-ops-vscode-extension@1.3.2
 echo "export OPS_BRANCH=main" >> ~/.bashrc
 source ~/.bashrc
 ops -plugin https://github.com/nuvolaris/olaris-lv
-echo 'export PATH=$HOME/.ops/olaris-lv/.ven/bin:$PATH' >> ~/.bashrc
+echo 'export PATH="$HOME/.ops/olaris-lv/.venv/bin:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 ops lv setup "$C"
 ops lv new "${C:-index}" lovable
