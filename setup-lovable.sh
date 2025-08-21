@@ -2,6 +2,8 @@
 curl -sL bit.ly/get-ops | bash
 echo "export OPS_BRANCH=main" >> ~/.bashrc
 source ~/.bashrc
+source /usr/local/share/nvm/nvm.sh
+use nvm 20
 ops -plugin https://github.com/nuvolaris/olaris-lv
 ops lv setup "$C"
 code --install-extension ms-vscode.test-adapter-converter
