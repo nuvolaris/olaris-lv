@@ -136,4 +136,93 @@ client = MilvusClient(uri=uri, token=token, db_name=db_name)
 - JSON input/output objects only
 - Proper annotation comments in `__main__.py`
 - Environment-based configuration management
-- Support for Redis, PostgreSQL, S3, and Milvus services
+- Support for Redis, PostgreSQL, S3, and Milvus 
+
+# Web Actions Development Guide
+
+The following rules apply to write backend REST calls (aka web actions) for the frontend.
+
+## Overview
+
+Web actions are serverless functions that can be invoked via HTTP REST interface without requiring authentication credentials. They enable you to build web-based applications with backend logic accessible anonymously.
+
+## Web Action Basics
+
+### URL Structure
+
+Web actions are accessible to the frontend with this structure
+
+```
+/api/my/{PACKAGE}/{ACTION}.{EXTENSION}
+```
+
+Note that an {ACTION} has a name, but it can be also be accesset as {NAME}/{SUBPATH} allowing an internal routing.
+
+The {SUBPATH} is then available in the `__ow_path` argument.
+
+### Creating Web Actions
+
+Enable web functionality using in the `__main__.py` the
+
+```
+#--param web true
+```
+
+## HTTP Request Context
+
+Web actions automatically receive HTTP request details as parameters:
+
+### Available Parameters
+- `__ow_method`: HTTP method (GET, POST, PUT, etc.)
+- `__ow_headers`: Request headers as key-value map
+- `__ow_path`: Unmatched path after action extension
+- `__ow_user`: Authenticated user namespace (if auth required)
+- `__ow_body`: Request body (base64 for binary, string otherwise)
+- `__ow_query`: Unparsed query string
+
+
+## Content Types and Extensions
+
+### Supported Extensions
+- `.json` - JSON response
+- `.html` - HTML response  
+- `.http` - HTTP response (default if no extension)
+- `.svg` - SVG response
+- `.text` - Plain text response
+
+### Example URLs
+```
+/api/my/guest/demo/hello.json    # JSON response
+/api/my/guest/demo/hello.html    # HTML response
+/api/my/guest/demo/hello.http    # HTTP response
+/api/my/guest/demo/hello         # Defaults to .http
+```
+
+## Request Processing
+
+### Parameter Precedence (highest to lowest)
+1. Body parameters
+2. Query parameters  
+3. Action parameters
+4. Package parameters
+
+### Input Formats
+- **JSON**: `application/json` (default)
+- **Form Data**: `application/x-www-form-urlencoded`
+- **Raw Data**: Any other content type
+
+### HTTP Methods
+Supported methods: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, `OPTIONS`
+
+## Best Practices
+
+### Authentication and Authorization
+- Web actions bypass OpenWhisk authentication
+- Implement your own auth logic (OAuth, JWT, etc.)
+- Use `__ow_user` when authentication annotation is enabled
+
+### Content Type Handling
+- Specify the right extension for the URL
+- Default is `application/json` for objects, `text/html` for strings
+- Use base64 encoding for binary data
+
