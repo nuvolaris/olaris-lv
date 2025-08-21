@@ -6,7 +6,7 @@ code --install-extension pgant.antonio-ops-vscode-extension@1.3.2
 echo "export OPS_BRANCH=main" >> ~/.bashrc
 source ~/.bashrc
 source /usr/local/share/nvm/nvm.sh
-use nvm 20
+nvm use 20
 ops -plugin https://github.com/nuvolaris/olaris-lv
 ops lv setup "$C"
 ops lv new "$C" lovable
