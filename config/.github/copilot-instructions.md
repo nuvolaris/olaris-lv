@@ -1,7 +1,16 @@
 # Serverless REST API Backend Development Instructions
 
 ## Overview
-You are developing a serverless REST API backend for a frontend application. Each function operates independently, is scalable, and stateless without shared code.
+You are developing a serverless REST API backend for a frontend application. 
+Each function operates independently, is scalable, and stateless without shared code.
+
+You have to always write unit and integration tests for each action.
+Unit tests must invoke directly the action function passing dictionaries.
+Integration test must use the requests library and perform HTTP requests to the deployed action endpoints.
+
+You can execute an unit test in isolation, as they use test containers.
+When you change the code of an action, before executing the integration test,
+you have to redeploy it with `ops ide deploy <package>/<action>`.
 
 ## Goals
 - Code Python REST API backend functions
@@ -26,19 +35,29 @@ You are developing a serverless REST API backend for a frontend application. Eac
 ## Development Commands
 
 ### Creating Actions
+
 ```bash
 ops lv new <action> <package>
 ```
 
-### Deployment
+### Deployment 
+
+Before any deployment you need credentials, stored in `~/.wskprops`.
+If there is not a `~/.wskprops` file you need to create it logging into the system:
+
 ```bash
-# Login first
 ops ide login
+```
 
 # Deploy single action
+
+```bash
 ops ide deploy <package>/<action>
+```
 
 # Deploy all actions
+
+```bash
 ops ide deploy
 ```
 
@@ -61,39 +80,53 @@ When needing a secret:
 1. Request addition to `.env` file
 2. Add metadata comment to `__main__.py`: `#--param <SECRET> "$<SECRET>"`
 3. Retrieve in main function (not `__main__.py`):
-   ```python
-   <SECRET> = args.get("<SECRET>", os.getenv("<SECRET>"))
-   ```
+   
+```python
+<SECRET> = args.get("<SECRET>", os.getenv("<SECRET>"))
+```
 
 ## Service Integrations
 
 ### Redis Configuration
-Add to `__main__.py`:
+
+When you need to use Redis, do always 3 things:
+
+1. Add to `__main__.py`:
 ```python
 #--param REDIS_URL $REDIS_URL
 #--param REDIS_PREFIX $REDIS_PREFIX
 ```
 
-Access code for `<action>.<action>(args)`:
+2. Access code for `<action>.<action>(args)`:
 ```python
 rd = redis.from_url(args.get("REDIS_URL"), os.getenv("REDIS_URL"))
 prefix = args.get("REDIS_PREFIX"), os.getenv("REDIS_PREFIX"))
 # Always use prefix for all Redis Keys
 ```
 
+3. Ensure there is `ENABLE_REDIS` in the `tests/.env` file. 
+
 ### PostgreSQL Configuration
-Add to `__main__.py`:
+
+When you need to use Postgres, do always 2 things:
+
+1. add to `__main__.py`:
 ```python
 #--param POSTGRES_URL "$POSTGRES_URL"
 ```
 
-Access code for `<action>.<action>(args)`:
+2. use the code for `<action>.<action>(args)`:
 ```python
 dburl = args.get("POSTGRES_URL", os.getenv("POSTGRES_URL"))
 ```
 
+3. Ensure there is `ENABLE_REDIS` in the `tests/.env` file. 
+
 ### S3 Configuration
-Add to `__main__.py`:
+
+When you need to use S3, do always 3 things:
+
+1. Add to `__main__.py`:
 ```python
 #--param S3_HOST $S3_HOST
 #--param S3_PORT $S3_PORT
@@ -102,7 +135,7 @@ Add to `__main__.py`:
 #--param S3_BUCKET_DATA $S3_BUCKET_DATA
 ```
 
-Access code for `<action>.<action>(args)`:
+2. Access code for `<action>.<action>(args)`:
 ```python
 host = args.get("S3_HOST", os.getenv("S3_HOST"))
 port = args.get("S3_PORT", os.getenv("S3_PORT"))
@@ -113,8 +146,13 @@ store_s3 = boto3.client('s3', region_name='us-east-1', endpoint_url=url, aws_acc
 store_bucket = args.get("S3_BUCKET_DATA", os.getenv("S3_BUCKET_DATA"))
 ```
 
+3. Ensure there is `ENABLE_MINIO` in the `tests/.env` file. 
+
 ### Milvus Configuration
-Add to `__main__.py`:
+
+When you need to use Milvus, do always 3 things:
+
+1. Add to `__main__.py`:
 ```python
 #--param MILVUS_HOST $MILVUS_HOST
 #--param MILVUS_PORT $MILVUS_PORT
@@ -122,13 +160,15 @@ Add to `__main__.py`:
 #--param MILVUS_TOKEN $MILVUS_TOKEN
 ```
 
-Access code for `<action>.<action>(args)`:
+2. Access code for `<action>.<action>(args)`:
 ```python
 uri = f"http://{args.get("MILVUS_HOST", os.getenv("MILVUS_HOST"))}"
 token = args.get("MILVUS_TOKEN", os.getenv("MILVUS_TOKEN"))
 db_name = args.get("MILVUS_DB_NAME", os.getenv("MILVUS_DB_NAME"))
 client = MilvusClient(uri=uri, token=token, db_name=db_name)
 ```
+
+3. Ensure there is `ENABLE_MILVUS` in the `tests/.env` file. 
 
 ## Key Requirements Summary
 - Serverless, stateless, independent functions

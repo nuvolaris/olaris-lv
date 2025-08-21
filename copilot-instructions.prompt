@@ -113,6 +113,18 @@ client =  MilvusClient(uri=uri, token=token, db_name=db_name)
 </Snippets>
 
 <PythonLibraries>
-requests
-openai
+  - `requests`
+  - `openai`
+  - `psycopg`
+  - `boto3`
+  - `pymilvus`
+  - `redis`
 </PythonLibraries>
+
+
+
+
+write a spec for me for unit testing
+you should run unit tests creating testcontainers for
+Postgres and Redis and Minio then set the ei
+
