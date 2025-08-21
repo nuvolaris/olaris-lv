@@ -1,8 +1,8 @@
 #!/bin/bash
-nvm use 20
 curl -sL bit.ly/get-ops | bash
 echo "export OPS_BRANCH=main" >> ~/.bashrc
 source ~/.bashrc
+nvm use 20
 ops -plugin https://github.com/nuvolaris/olaris-lv
 ops lv setup "$C"
 code --install-extension pgant.antonio-ops-vscode-extension@1.3.2
