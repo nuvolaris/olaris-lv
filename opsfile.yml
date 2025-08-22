@@ -11,7 +11,7 @@ tasks:
     desc: 'Setup the environment for the application'
     cmds:
     - curl -sL "{{.PYREQ}}" -o requirements.txt
-    - uv venv -p {{.PYVER}}
+    - test -d .venv || uv venv -p {{.PYVER}}
     - uv pip install -r requirements.txt
     - uv run setup.py "{{._sub_}}"
     - task: config
