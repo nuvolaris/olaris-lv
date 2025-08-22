@@ -15,5 +15,5 @@ ops lv new "${C:-index}" lovable
 if test -z "$C"
 then echo "Installed as index.html"
      echo "Use 'ops lv setup <comp>' to set up as <comp>.html"
-     echo "Reload the configuration by 'source ~/.bashrc' or restart your terminal."
 fi
+echo "Reload the configuration by 'source ~/.bashrc' or restart your terminal."
