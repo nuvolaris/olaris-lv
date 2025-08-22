@@ -32,6 +32,20 @@ you have to redeploy it with `ops ide deploy <package>/<action>`.
 - Write code in `<action>.py` file within the `<action>` module, **never** in `__main__.py`
 - Always add annotation comments (format: `#--`) in `__main__.py`
 
+### Common Annotation
+
+Each action must specify its kind, so it needs always
+
+```
+#--kind python:default
+```
+
+Action that are invoked publicly also need to be exposed with
+
+```
+#--param true
+```
+
 ## Development Commands
 
 ### Creating Actions
@@ -54,6 +68,13 @@ ops ide login
 ```bash
 ops ide deploy <package>/<action>
 ```
+
+If you need to add parameters to the action, add them in `__main__.py` 
+as a comment `#--param <PARAM_NAME>  <PARAM_VALUE>`
+
+A <PARAM_VALUE> is a shell expression and can use variables, in the format `"$VARIABLE`. 
+
+Variables can be defined in `.env` or be one of the service secrets provided by the system.
 
 # Deploy all actions
 
