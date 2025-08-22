@@ -1,18 +1,22 @@
 # Serverless REST API Backend Development Instructions
 
 ## Overview
-You are developing a serverless REST API backend for a frontend application. 
+
+You are developing a serverless REST API backend for a frontend application.
 Each function operates independently, is scalable, and stateless without shared code.
 
 You have to always write unit and integration tests for each action.
 Unit tests must invoke directly the action function passing dictionaries.
-Integration test must use the requests library and perform HTTP requests to the deployed action endpoints.
+
+Integration test must use the requests library and perform HTTP requests to the deployed action endpoints, 
+using as host the `OPSDEV_HOST` environment variable.
 
 You can execute an unit test in isolation, as they use test containers.
 When you change the code of an action, before executing the integration test,
 you have to redeploy it with `ops ide deploy <package>/<action>`.
 
 ## Goals
+
 - Code Python REST API backend functions
 - Support an existing JavaScript frontend (generated with Lovable) that **MUST NOT** be modified
 - Each deployed action becomes a REST endpoint at `/api/my/<package>/<name>`
@@ -20,6 +24,7 @@ you have to redeploy it with `ops ide deploy <package>/<action>`.
 ## Project Structure
 
 ### Action Organization
+
 - Actions are stored in `packages/<package>/<name>/*.py`
 - Each action requires a `packages/<package>/<name>/__main__.py` file
 - Each action has an `<action>.py` file with a `main` function
@@ -27,6 +32,7 @@ you have to redeploy it with `ops ide deploy <package>/<action>`.
 - Integration tests: `tests/<package>/test_<name>_int.py`
 
 ### Function Structure
+
 - Main function receives JSON object input and returns JSON object output (never arrays or primitives)
 - `__main__.py` ends with: `return {"body": <action>.<action>(args) }`
 - Write code in `<action>.py` file within the `<action>` module, **never** in `__main__.py`
@@ -54,7 +60,7 @@ Action that are invoked publicly also need to be exposed with
 ops lv new <action> <package>
 ```
 
-### Deployment 
+### Deployment
 
 Before any deployment you need credentials, stored in `~/.wskprops`.
 If there is not a `~/.wskprops` file you need to create it logging into the system:
@@ -69,10 +75,10 @@ ops ide login
 ops ide deploy <package>/<action>
 ```
 
-If you need to add parameters to the action, add them in `__main__.py` 
+If you need to add parameters to the action, add them in `__main__.py`
 as a comment `#--param <PARAM_NAME>  <PARAM_VALUE>`
 
-A <PARAM_VALUE> is a shell expression and can use variables, in the format `"$VARIABLE`. 
+A <PARAM_VALUE> is a shell expression and can use variables, in the format `"$VARIABLE`.
 
 Variables can be defined in `.env` or be one of the service secrets provided by the system.
 
@@ -85,6 +91,7 @@ ops ide deploy
 ## Environment and Dependencies
 
 ### Limitations
+
 - Write **only Python code**, not JavaScript
 - Consider only `packages/*` and `tests/*` folders
 - **NEVER** use `pip import` or `requirements.txt`
@@ -97,11 +104,13 @@ ops ide deploy
   - `redis`
 
 ### Secrets Management
+
 When needing a secret:
+
 1. Request addition to `.env` file
 2. Add metadata comment to `__main__.py`: `#--param <SECRET> "$<SECRET>"`
 3. Retrieve in main function (not `__main__.py`):
-   
+
 ```python
 <SECRET> = args.get("<SECRET>", os.getenv("<SECRET>"))
 ```
@@ -113,41 +122,46 @@ When needing a secret:
 When you need to use Redis, do always 3 things:
 
 1. Add to `__main__.py`:
+
 ```python
 #--param REDIS_URL $REDIS_URL
 #--param REDIS_PREFIX $REDIS_PREFIX
 ```
 
 2. Access code for `<action>.<action>(args)`:
+
 ```python
 rd = redis.from_url(args.get("REDIS_URL"), os.getenv("REDIS_URL"))
 prefix = args.get("REDIS_PREFIX"), os.getenv("REDIS_PREFIX"))
 # Always use prefix for all Redis Keys
 ```
 
-3. Ensure there is `ENABLE_REDIS` in the `tests/.env` file. 
+3. Ensure there is `ENABLE_REDIS` in the `tests/.env` file.
 
 ### PostgreSQL Configuration
 
 When you need to use Postgres, do always 2 things:
 
 1. add to `__main__.py`:
+
 ```python
 #--param POSTGRES_URL "$POSTGRES_URL"
 ```
 
 2. use the code for `<action>.<action>(args)`:
+
 ```python
 dburl = args.get("POSTGRES_URL", os.getenv("POSTGRES_URL"))
 ```
 
-3. Ensure there is `ENABLE_REDIS` in the `tests/.env` file. 
+3. Ensure there is `ENABLE_REDIS` in the `tests/.env` file.
 
 ### S3 Configuration
 
 When you need to use S3, do always 3 things:
 
 1. Add to `__main__.py`:
+
 ```python
 #--param S3_HOST $S3_HOST
 #--param S3_PORT $S3_PORT
@@ -157,6 +171,7 @@ When you need to use S3, do always 3 things:
 ```
 
 2. Access code for `<action>.<action>(args)`:
+
 ```python
 host = args.get("S3_HOST", os.getenv("S3_HOST"))
 port = args.get("S3_PORT", os.getenv("S3_PORT"))
@@ -167,13 +182,14 @@ store_s3 = boto3.client('s3', region_name='us-east-1', endpoint_url=url, aws_acc
 store_bucket = args.get("S3_BUCKET_DATA", os.getenv("S3_BUCKET_DATA"))
 ```
 
-3. Ensure there is `ENABLE_MINIO` in the `tests/.env` file. 
+3. Ensure there is `ENABLE_MINIO` in the `tests/.env` file.
 
 ### Milvus Configuration
 
 When you need to use Milvus, do always 3 things:
 
 1. Add to `__main__.py`:
+
 ```python
 #--param MILVUS_HOST $MILVUS_HOST
 #--param MILVUS_PORT $MILVUS_PORT
@@ -182,6 +198,7 @@ When you need to use Milvus, do always 3 things:
 ```
 
 2. Access code for `<action>.<action>(args)`:
+
 ```python
 uri = f"http://{args.get("MILVUS_HOST", os.getenv("MILVUS_HOST"))}"
 token = args.get("MILVUS_TOKEN", os.getenv("MILVUS_TOKEN"))
@@ -189,15 +206,16 @@ db_name = args.get("MILVUS_DB_NAME", os.getenv("MILVUS_DB_NAME"))
 client = MilvusClient(uri=uri, token=token, db_name=db_name)
 ```
 
-3. Ensure there is `ENABLE_MILVUS` in the `tests/.env` file. 
+3. Ensure there is `ENABLE_MILVUS` in the `tests/.env` file.
 
 ## Key Requirements Summary
+
 - Serverless, stateless, independent functions
 - Python-only backend development
 - JSON input/output objects only
 - Proper annotation comments in `__main__.py`
 - Environment-based configuration management
-- Support for Redis, PostgreSQL, S3, and Milvus 
+- Support for Redis, PostgreSQL, S3, and Milvus
 
 # Web Actions Development Guide
 
@@ -234,6 +252,7 @@ Enable web functionality using in the `__main__.py` the
 Web actions automatically receive HTTP request details as parameters:
 
 ### Available Parameters
+
 - `__ow_method`: HTTP method (GET, POST, PUT, etc.)
 - `__ow_headers`: Request headers as key-value map
 - `__ow_path`: Unmatched path after action extension
@@ -241,17 +260,18 @@ Web actions automatically receive HTTP request details as parameters:
 - `__ow_body`: Request body (base64 for binary, string otherwise)
 - `__ow_query`: Unparsed query string
 
-
 ## Content Types and Extensions
 
 ### Supported Extensions
+
 - `.json` - JSON response
-- `.html` - HTML response  
+- `.html` - HTML response
 - `.http` - HTTP response (default if no extension)
 - `.svg` - SVG response
 - `.text` - Plain text response
 
 ### Example URLs
+
 ```
 /api/my/guest/demo/hello.json    # JSON response
 /api/my/guest/demo/hello.html    # HTML response
@@ -262,28 +282,32 @@ Web actions automatically receive HTTP request details as parameters:
 ## Request Processing
 
 ### Parameter Precedence (highest to lowest)
+
 1. Body parameters
-2. Query parameters  
+2. Query parameters
 3. Action parameters
 4. Package parameters
 
 ### Input Formats
+
 - **JSON**: `application/json` (default)
 - **Form Data**: `application/x-www-form-urlencoded`
 - **Raw Data**: Any other content type
 
 ### HTTP Methods
+
 Supported methods: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`, `HEAD`, `OPTIONS`
 
 ## Best Practices
 
 ### Authentication and Authorization
+
 - Web actions bypass OpenWhisk authentication
 - Implement your own auth logic (OAuth, JWT, etc.)
 - Use `__ow_user` when authentication annotation is enabled
 
 ### Content Type Handling
+
 - Specify the right extension for the URL
 - Default is `application/json` for objects, `text/html` for strings
 - Use base64 encoding for binary data
-
