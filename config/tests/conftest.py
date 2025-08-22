@@ -45,7 +45,7 @@ def postgres():
         pytest.skip("Postgres fixture disabled (set ENABLE_POSTGRES=1 to enable)")
 
     container = PostgresContainer("postgres:16-alpine").start()
-    os.environ["POSTGRES_URL"] = container.get_connection_url()
+    os.environ["POSTGRES_URL"] = container.get_connection_url().replace("+psycopg2", "", 1)
     yield container
     container.stop()
 
