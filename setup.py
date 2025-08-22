@@ -24,7 +24,7 @@ try:
     pj = json.loads(Path("package.json").read_text(encoding="utf-8"))
     pj["openserverless"] = {
         "devel": "npm run dev",
-        "deploy": "npm run build"
+        "deploy": f"npm run build ; echo \"Deployed as $OPSDEV_HOST/{c}.html\""
     }
     pj["scripts"]["build"] = build
     Path("package.json").write_text(json.dumps(pj, indent=2), encoding="utf-8")
