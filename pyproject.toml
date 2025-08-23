@@ -8,10 +8,11 @@ dependencies = [
     "ipython>=9.4.0",
     "openai>=1.97.1",
     "prompt-toolkit>=3.0.51",
+    "psycopg[binary]>=3.2.9",
     "pymilvus>=2.6.0",
     "pytest>=8.4.1",
     "pytest-pythonpath>=0.7.3",
     "python-dotenv>=1.1.1",
     "requests>=2.32.4",
-    "testcontainers[milvus,minio,postgres,redis]>=4.12.0",
+    "testcontainers[mailpit,milvus,minio,postgres,redis]>=4.12.0",
 ]
